@@ -72,3 +72,18 @@ WHERE r1.date BETWEEN '20170227' AND '20170313'
 GROUP BY 1,2,3;
 ORDER BY t1.date;
 --------------------------------------------------------------------
+MERGE TestTable AS T_BASE
+USING TestTableDop AS T_SOURCE
+ON (T_Base.ProductId = T_Source.ProductId)
+WHEN MATCHED THEN 
+UPDATE SET ProductName = T_Source.ProductName, Summa = T_Source.Summa
+WHEN NOT MATCHED THEN INSERT (ProductId, ProductName, Summa) 
+VALUES (T_Source.ProductId, T_Source.ProductName, T_Source.Summa)
+ OUTPUT $action AS [Операция], Inserted.ProductId, Inserted.ProductName AS ProductNameNEW,
+                   Inserted.Summa AS SummaNEW, 
+                   Deleted.ProductName AS ProductNameOLD, 
+                   Deleted.Summa AS SummaOLD; 
+
+  SELECT * FROM dbo.TestTable
+        SELECT * FROM dbo.TestTableDop
+
