@@ -86,4 +86,57 @@ VALUES (T_Source.ProductId, T_Source.ProductName, T_Source.Summa)
 
   SELECT * FROM dbo.TestTable
         SELECT * FROM dbo.TestTableDop
+-----------------------------------------------------------------
+USE TSQL2012
 
+EXEC sp_rename 'orders.Amountt', 'amount', 'COLUMN';  
+
+CREATE TABLE TestTable(       
+[Id] [INT] IDENTITY(1,1) NOT NULL,
+[ProductName] [VARCHAR](100) NOT NULL,
+[Price] [Money] NOT NULL
+)
+
+CREATE PROCEDURE TestProcedure
+AS
+BEGIN
+SELECT ProductName, Price
+        FROM TestTable
+   END
+
+
+   INSERT INTO TestTable(ProductName, Price)
+           VALUES ('Компьютер', 100),
+                   ('Клавиатура', 20),
+                   ('Монитор', 50)
+
+				   INSERT INTO TestTable(ProductName, Price)
+				   SELECT * FROM TestTable
+
+ INSERT INTO TestTable(ProductName, Price)
+ EXEC TestProcedure
+
+ UPDATE TestTable SET Price = Price + 100 WHERE Price = 20
+
+CREATE PROCEDURE TestProcedure3 
+   (
+        --Входящие параметры
+        @CategoryId INT,
+        @ProductName VARCHAR(100),
+        @Price MONEY = 0
+   )
+   AS
+   BEGIN
+        
+        INSERT INTO TestTable(CategoryId, ProductName, Price)
+                VALUES (@CategoryId, @ProductName, @Price)
+        SELECT * FROM TestTable
+        WHERE CategoryId = @CategoryId
+   END
+
+   GO
+
+EXEC TestProcedure3 3,  'Тестовый товар 3', 400
+
+EXEC TestProcedure3 @CategoryId = 2, @ProductName = 'Тестовый товар 2',
+                                   @Price = 300
